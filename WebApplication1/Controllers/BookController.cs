@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using WebApplication1.Data;
 using WebApplication1.Models;
 
 namespace WebApplication1.Controllers;
@@ -8,55 +10,22 @@ namespace WebApplication1.Controllers;
 [ApiController]
 public class BookController : ControllerBase
 {
-    static private List<Book> s_books = new List<Book>
+    private readonly FirstAPIContext _context;
+    public BookController(FirstAPIContext context)
     {
-        new Book
-        {
-            Id = 1,
-            Title = "The Great Gatsby",
-            Author = "F. Scott Fitzgerald",
-            YearPublished = 1925
-        },
-        new Book
-        {
-            Id = 2,
-            Title = "To Kill a Mockingbird",
-            Author = "Harper Lee",
-            YearPublished = 1960
-        },
-        new Book
-        {
-            Id = 3,
-            Title = "1984",
-            Author = "George Orwell",
-            YearPublished = 1949
-        },
-        new Book         {
-            Id = 4,
-            Title = "Pride and Prejudice",
-            Author = "Jane Austen",
-            YearPublished = 1813
-        },
-        new Book
-        {
-            Id = 5,
-            Title = "The Catcher in the Rye",
-            Author = "J.D. Salinger",
-            YearPublished = 1951
-        }
-    };
-
+        _context = context;
+    }
     [HttpGet]
-    public ActionResult<List<Book>> GetBooks()
+    public async Task<ActionResult<List<Book>>> GetBooks()
     {
-        return Ok(s_books);
+        return Ok(await _context.Books.ToListAsync());
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Book> GetBookById(int id)
+    public async Task<ActionResult<Book>> GetBookById(int id)
     {
-        var book = s_books.FirstOrDefault(b => b.Id == id);
-        
+        var book = await _context.Books.FindAsync(id);
+
         if (book is null)
         {
             return NotFound();
@@ -66,45 +35,51 @@ public class BookController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Book> CreateBook(Book book)
+    public async Task<ActionResult<Book>> CreateBook(Book book)
     {
         if (book is null)
         {
             return BadRequest();
         }
 
-        s_books.Add(book);
+        _context.Books.Add(book);
+        await _context.SaveChangesAsync();
+
         return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
     }
 
     [HttpPut("{id}")]
-    public IActionResult UpdateBook(int id, Book updatedBook)
+    public async Task<ActionResult<Book>> UpdateBook(int id, Book updatedBook)
     {
-        var existingBook = s_books.FirstOrDefault(b => b.Id == id);
+        var existingBook = await _context.Books.FindAsync(id);
 
         if (existingBook is null)
         {
             return NotFound();
         }
 
-        existingBook.Title          = updatedBook.Title;
-        existingBook.Author         = updatedBook.Author;
-        existingBook.YearPublished  = updatedBook.YearPublished;
+        existingBook.Title = updatedBook.Title;
+        existingBook.Author = updatedBook.Author;
+        existingBook.YearPublished = updatedBook.YearPublished;
+
+        await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetBookById), new { id = existingBook.Id }, existingBook); ;
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteBook(int id)
+    public async Task<ActionResult<Book>> DeleteBook(int id)
     {
-        var bookForDeletion = s_books.FirstOrDefault(b => b.Id == id);
+        var bookForDeletion = await _context.Books.FindAsync(id);
 
         if (bookForDeletion is null)
         {
             return NotFound();
         }
 
-        s_books.Remove(bookForDeletion);
+        _context.Books.Remove(bookForDeletion);
+
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }
