@@ -3,6 +3,30 @@
 GET {{rootURL}}/weatherforecast/
 Accept: application/json
 
-###
+### get all books
 GET {{rootURL}}/api/book
 Accept: application/json
+
+### get books by id
+GET {{rootURL}}/api/book/5
+Accept: application/json
+
+### create new book
+POST {{rootURL}}/api/book
+Content-Type: application/json
+{
+  "id": 6,
+  "title": "The Great Gatsby",
+  "author": "F. Scott Fitzgerald",
+  "yearPublished": 1925
+}
+
+### update book
+PUT {{rootURL}}/api/book/6
+Content-type: application/json
+{
+  "id": 6,
+  "title": "The Great Gatsby - v1",
+  "author": "F. Scott Fitzgerald - v1",
+  "yearPublished": 1926
+}

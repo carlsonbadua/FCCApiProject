@@ -53,13 +53,15 @@ public class BookController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Book> GetBook(int id)
+    public ActionResult<Book> GetBookById(int id)
     {
         var book = s_books.FirstOrDefault(b => b.Id == id);
-        if (book == null)
+        
+        if (book is null)
         {
             return NotFound();
         }
+
         return Ok(book);
     }
 
@@ -72,6 +74,23 @@ public class BookController : ControllerBase
         }
 
         s_books.Add(book);
-        return Ok(book);
+        return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
+    }
+
+    [HttpPut("{id}")]
+    public IActionResult UpdateBook(int id, Book updatedBook)
+    {
+        var existingBook = s_books.FirstOrDefault(b => b.Id == id);
+
+        if (existingBook is null)
+        {
+            return NotFound();
+        }
+
+        existingBook.Title          = updatedBook.Title;
+        existingBook.Author         = updatedBook.Author;
+        existingBook.YearPublished  = updatedBook.YearPublished;
+
+        return NoContent();
     }
 }
