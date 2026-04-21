@@ -91,6 +91,21 @@ public class BookController : ControllerBase
         existingBook.Author         = updatedBook.Author;
         existingBook.YearPublished  = updatedBook.YearPublished;
 
+        return CreatedAtAction(nameof(GetBookById), new { id = existingBook.Id }, existingBook); ;
+    }
+
+    [HttpDelete("{id}")]
+    public IActionResult DeleteBook(int id)
+    {
+        var bookForDeletion = s_books.FirstOrDefault(b => b.Id == id);
+
+        if (bookForDeletion is null)
+        {
+            return NotFound();
+        }
+
+        s_books.Remove(bookForDeletion);
+
         return NoContent();
     }
 }

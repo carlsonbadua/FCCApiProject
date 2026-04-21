@@ -30,3 +30,6 @@ Content-type: application/json
   "author": "F. Scott Fitzgerald - v1",
   "yearPublished": 1926
 }
+
+### delete book
+DELETE {{rootURL}}/api/book/6
